@@ -1,0 +1,160 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="./dist/mindar-image.prod.js"></script>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="./dist/mindar-image-aframe.prod.js"></script>
+    <script src="./dist/aframe-extras.min.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+      }
+      .container {
+        overflow: hidden;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+
+      #scanning-overlay {
+    	display: flex;
+    	align-items: center;
+    	justify-content: center;
+    	position: absolute;
+    	left: 0;
+    	right: 0;
+    	top: 0;
+    	bottom: 0;
+    	background: transparent;
+    	z-index: 2;
+          }
+          @media (min-aspect-ratio: 1/1) {
+    	#scanning-overlay .inner {
+    	  width: 50vh;
+    	  height: 50vh;
+    	}
+          }
+          @media (max-aspect-ratio: 1/1) {
+    	#scanning-overlay .inner {
+    	  width: 80vw;
+    	  height: 80vw;
+    	}
+          }
+
+          #scanning-overlay .inner {
+    	display: flex;
+    	align-items: center;
+    	justify-content: center;
+    	position: relative;
+
+    	background:
+    	  linear-gradient(to right, white 10px, transparent 10px) 0 0,
+    	  linear-gradient(to right, white 10px, transparent 10px) 0 100%,
+    	  linear-gradient(to left, white 10px, transparent 10px) 100% 0,
+    	  linear-gradient(to left, white 10px, transparent 10px) 100% 100%,
+    	  linear-gradient(to bottom, white 10px, transparent 10px) 0 0,
+    	  linear-gradient(to bottom, white 10px, transparent 10px) 100% 0,
+    	  linear-gradient(to top, white 10px, transparent 10px) 0 100%,
+    	  linear-gradient(to top, white 10px, transparent 10px) 100% 100%;
+    	background-repeat: no-repeat;
+    	background-size: 40px 40px;
+          }
+
+          #scanning-overlay.hidden {
+    	display: none;
+          }
+
+          #scanning-overlay img {
+    	opacity: 0.6;
+    	width: 90%;
+    	align-self: center;
+          }
+
+          #scanning-overlay .inner .scanline {
+    	position: absolute;
+    	width: 100%;
+    	height: 10px;
+    	background: white;
+    	animation: move 2s linear infinite;
+          }
+          @keyframes move {
+    	0%, 100% { top: 0% }
+    	50% { top: calc(100% - 10px) }
+          }
+
+          #instrucciones{
+            color: white;
+            position: absolute;
+            font-size: 50px;
+            top: 50px;
+            font-family: sans-serif;
+          }
+
+          #creditos{
+            color: white;
+            position: absolute;
+            font-size: 40px;
+            bottom: 50px;
+          }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+
+      <div id="scanning-overlay" class="hidden">
+        <span id="instrucciones">Listo para escanear</span>
+        <div class="inner">
+      	<div class="scanline"></div>
+        </div>
+      </div>
+
+      <a-scene mindar-image="uiScanning: #scanning-overlay; imageTargetSrc: ./assets/mandelbrot.mind; showStats: false;" embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        <a-assets>
+          <video id="video1" src="./assets/Mandelbrot_sequence.mp4" loop="true" autoplay muted="true"></video>
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+         <a-entity vidhandler="target: #vid, #video1" id="target"  mindar-image-target="targetIndex: 0">
+           <a-plane src="#video1" position="0 0 0" height="0.722" width="1" rotation="0 0 0"></a-plane>
+         </a-entity>
+
+      </a-scene>
+      <script>
+          /*window.addEventListener('load', function () {
+          var v1 = document.querySelector('#video1');
+          v1.play();
+        });*/
+
+        AFRAME.registerComponent('vidhandler', {
+        schema: {
+          target: {type: 'string'}
+        },
+        init: function() {
+            this.videoNodes = document.querySelectorAll(this.data.target)
+        },
+        tick: function() {
+            if (this.el.object3D.visible == true) {
+                if (!this.toggle) {
+                    this.toggle = true;
+                    for (let i = 0; i < this.videoNodes.length; i++) {
+                        this.videoNodes[i].play();
+                    }
+                }
+            } else {
+                if (this.toggle) {
+                  for (let i = 0; i < this.videoNodes.length; i++) {
+                    this.videoNodes[i].pause();
+                  }
+                  this.toggle = false;
+                }
+            }
+        }
+        });
+
+      </script>
+    </div>
+  </body>
+</html>
